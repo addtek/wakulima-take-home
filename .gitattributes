@@ -1,0 +1,77 @@
+# OSX
+
+# Xcode
+#
+build/
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+## Obj-C/Swift specific
+*.dSYM.zip
+*.dSYM
+xcuserdata
+*.xccheckout
+*.moved-aside
+DerivedData
+*.hmap
+*.ipa
+*.xcuserstate
+project.xcworkspace/
+
+# Android/IntelliJ
+#
+
+secure.properties
+build/
+.idea
+.gradle
+local.properties
+*.iml
+
+# Visual Studio Code
+#
+.vscode/
+
+# node.js
+#
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# BUCK
+buck-out/
+\.buckd/
+*.keystore
+!debug.keystore
+
+# Ignore our unencrypted authentication JSON file and only commit the encrypted version
+fastlane/app-store-connect-auth.json
+
+# Ignore google JSON configs
+android/keystore/*.json
+
+# Bundle artifact
+*.jsbundle
+
+# CocoaPods
+/ios/Pods/
+
+# Heap hprof
+*.hprof
+
+# generated config files
+.env
+.env_build
+!/config/.env.*
+android/app/google-services.json
+
+ios/Wakulima/GoogleService-Info.plist
+ios/Wakulima.xcarchive
+ios/IPA
+
+coverage
