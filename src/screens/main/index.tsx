@@ -45,7 +45,7 @@ export const HomeScreen = () => {
       <View style={styles.floatingButtonWrap}>
         <ActionButton
           onPress={() =>
-            navigateMasterScreen('fieldMonitoring', {farmId: '343@#'})
+            navigateMasterScreen('registerField', {farmId: '343@#'})
           }
           styles={styles.floatingButton}
           child={<Icon iconType={AppIcons.add} width={30} />}
