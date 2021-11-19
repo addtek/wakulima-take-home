@@ -9,10 +9,12 @@ import {FarmListView} from 'src/components/FarmListView';
 import {ActionButton} from 'src/components/ActionButton';
 import {AppIcons, Icon} from 'src/components/Icon';
 import {navigateMasterScreen} from 'src/services/navigation/master-navigator';
+import {useFarmList} from 'src/hooks/useFarmList';
 // import {LoadingIndicator} from 'components/LoadingIndicator';
 const HEADER_EXPANDED_HEIGHT = 350;
 
 export const HomeScreen = () => {
+  const {warn, Dialog} = useFarmList();
   let deviceHeaderHeight: number;
   deviceHeaderHeight = useHeaderHeight();
 
@@ -44,13 +46,12 @@ export const HomeScreen = () => {
       </CollapsibleToolbar>
       <View style={styles.floatingButtonWrap}>
         <ActionButton
-          onPress={() =>
-            navigateMasterScreen('registerField', {farmId: '343@#'})
-          }
+          onPress={() => navigateMasterScreen('registerField', {})}
           styles={styles.floatingButton}
           child={<Icon iconType={AppIcons.add} width={30} />}
         />
       </View>
+      {warn && <Dialog />}
     </View>
   );
 };

@@ -1,17 +1,14 @@
 import {useState} from 'react';
 import {SubmitHandler, useForm} from 'react-hook-form';
-import {schema} from 'src/screens/harvest-recording/harvest.schema';
+import {schema} from 'src/screens/field-monitoring/field-monitoring.schema';
 import {yupResolver} from '@hookform/resolvers/yup';
 
 export interface FarmHarvestFormData {
   crop: string;
-  year: string;
-  season: string;
-  quantity: string;
-  unit: string;
+  rain: string;
 }
 export type Submit = SubmitHandler<FarmHarvestFormData>;
-export const useRecordFarmHarvest = () => {
+export const useFieldMonitoring = () => {
   const [isLoading, setLoading] = useState(false);
   const {
     control,
@@ -19,7 +16,7 @@ export const useRecordFarmHarvest = () => {
     formState: {errors},
   } = useForm<FarmHarvestFormData>({
     resolver: yupResolver(schema),
-    defaultValues: {crop: '', year: '', season: '', quantity: '', unit: ''},
+    defaultValues: {crop: '', rain: ''},
   });
   const onSubmit: Submit = data => {
     setLoading(true);

@@ -1,24 +1,35 @@
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
-import {SafeAreaView, View} from 'react-native';
+import {Dimensions, SafeAreaView, View} from 'react-native';
 import MapboxGL from '@react-native-mapbox-gl/maps';
 
 import CustomBackButton from 'src/components/CustomBackButton';
 import {styles} from './styles';
 
-import {useNavigation} from '@react-navigation/native';
+import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {AppColors} from 'src/theme';
 import BottomSheet from '@gorhom/bottom-sheet';
 import {Tabs} from 'src/components/Tabs';
 import {AppText} from 'src/components/AppText';
-import {Divider, HStack} from 'native-base';
+import {Divider, HStack, Select} from 'native-base';
 import {Spacer} from 'src/components/Spacer';
+import {useFarmList} from 'src/hooks/useFarmList';
+import {RootStackParamList} from 'src/services/navigation/types';
+import {ActionButton} from 'src/components/ActionButton';
+import {navigateMasterScreen} from 'src/services/navigation/master-navigator';
+import {AppIcons, Icon} from 'src/components/Icon';
+import {BarChart, LineChart} from 'react-native-chart-kit';
+import {Controller} from 'react-hook-form';
+import {useFieldMonitoring} from 'src/hooks/useFieldMonitoring';
 
 export type Position = number[];
-
+export type MonitoringScreenRouteProp = RouteProp<
+  RootStackParamList,
+  'fieldMonitoring'
+>;
 export const FieldMonitoringScreen = () => {
   const bottomSheetRef = useRef<BottomSheet>(null);
-
-  // variables
+  const route = useRoute<MonitoringScreenRouteProp>();
+  const {farmId} = route.params;
   const snapPoints = useMemo(() => ['60%', '75%'], []);
 
   // callbacks
@@ -28,12 +39,14 @@ export const FieldMonitoringScreen = () => {
 
   const [polygonLocation] = useState<Position[]>([]);
 
-  const [] = useState({
-    latitude: 37.78825,
-    longitude: -122.4324,
-    latitudeDelta: 0.0922,
-    longitudeDelta: 0.0421,
-  });
+  const {farms} = useFarmList();
+  const [farm, setFarm] = useState(
+    farms.find(currentFarm => currentFarm.id === farmId),
+  );
+
+  useEffect(() => {
+    setFarm(farms.find(currentFarm => currentFarm.id === farmId));
+  }, [farmId, farms]);
 
   useEffect(() => {
     handleCenter();
@@ -42,7 +55,7 @@ export const FieldMonitoringScreen = () => {
   const handleCenter = () => {
     mapRef.current?.getCenter();
   };
-
+  const {control, isLoading} = useFieldMonitoring();
   const polygonData = useCallback(() => {
     let data: Position[] = [];
     if (polygonLocation.length > 1) {
@@ -100,12 +113,77 @@ export const FieldMonitoringScreen = () => {
       </MapboxGL.ShapeSource>
     );
   };
+  const chartWidth = Dimensions.get('window').width - 50;
   const tabScenes = [
     {
       label: 'Harvest History',
       component: (
-        <View>
-          <AppText>Harvest History</AppText>
+        <View style={styles.tabContentView}>
+          <Controller
+            name="season"
+            control={control}
+            defaultValue=""
+            render={(props): React.ReactElement => (
+              <View style={styles.input}>
+                <Select
+                  {...props}
+                  onValueChange={(value): void => props.field.onChange(value)}
+                  testID="crop"
+                  variant="underlined"
+                  placeholder="Select Crop"
+                  isDisabled={isLoading}>
+                  <Select.Item label="Early Season" value="earlyseason" />
+                  <Select.Item label="Mid Season" value="midseason" />
+                  <Select.Item label="Late Season" value="lateseason" />
+                  <Select.Item label="Full Season" value="fullseason" />
+                </Select>
+              </View>
+            )}
+          />
+          <BarChart
+            data={{
+              labels: ['2015', '2016', '2017', '2018', '2019', '2020', '2021'],
+              datasets: [
+                {
+                  data: [
+                    Math.random() * 100,
+                    Math.random() * 100,
+                    Math.random() * 100,
+                    Math.random() * 100,
+                    Math.random() * 100,
+                    Math.random() * 100,
+                    Math.random() * 100,
+                  ],
+                },
+              ],
+            }}
+            yAxisLabel={''}
+            yAxisSuffix={''}
+            width={chartWidth} // from react-native
+            height={220}
+            yAxisInterval={1} // optional, defaults to 1
+            chartConfig={{
+              backgroundColor: '#ffffff',
+              backgroundGradientFrom: '#ffffff',
+              backgroundGradientTo: '#ffffff',
+              fillShadowGradientOpacity: 1,
+              decimalPlaces: 2, // optional, defaults to 2dp
+              color: () => '#2B7F68',
+              labelColor: () => '#000000',
+              style: {
+                borderRadius: 16,
+              },
+              propsForDots: {
+                r: '6',
+                strokeWidth: '2',
+                stroke: '#919B38',
+              },
+            }}
+            style={{
+              marginVertical: 8,
+              borderRadius: 16,
+            }}
+          />
         </View>
       ),
     },
@@ -113,7 +191,70 @@ export const FieldMonitoringScreen = () => {
       label: 'Weather History',
       component: (
         <View>
-          <AppText>Weather History</AppText>
+          <Controller
+            name="season"
+            control={control}
+            defaultValue=""
+            render={(props): React.ReactElement => (
+              <View style={styles.input}>
+                <Select
+                  {...props}
+                  onValueChange={(value): void => props.field.onChange(value)}
+                  testID="rain"
+                  variant="underlined"
+                  placeholder="Rain"
+                  isDisabled={isLoading}>
+                  <Select.Item label="Early Season" value="earlyseason" />
+                  <Select.Item label="Mid Season" value="midseason" />
+                  <Select.Item label="Late Season" value="lateseason" />
+                  <Select.Item label="Full Season" value="fullseason" />
+                </Select>
+              </View>
+            )}
+          />
+          <LineChart
+            data={{
+              labels: ['2015', '2016', '2017', '2018', '2019', '2020', '2021'],
+              datasets: [
+                {
+                  data: [
+                    Math.random() * 100,
+                    Math.random() * 100,
+                    Math.random() * 100,
+                    Math.random() * 100,
+                    Math.random() * 100,
+                    Math.random() * 100,
+                    Math.random() * 100,
+                  ],
+                },
+              ],
+            }}
+            width={chartWidth} // from react-native
+            height={220}
+            yAxisInterval={1} // optional, defaults to 1
+            chartConfig={{
+              backgroundColor: '#ffffff',
+              backgroundGradientFrom: '#ffffff',
+              backgroundGradientTo: '#ffffff',
+              fillShadowGradientOpacity: 1,
+              decimalPlaces: 2, // optional, defaults to 2dp
+              color: (opacity = 1) => `rgba(189, 195, 136, ${opacity})`,
+              labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+              style: {
+                borderRadius: 16,
+              },
+              propsForDots: {
+                r: '4',
+                strokeWidth: '2',
+                stroke: '#919B38',
+              },
+            }}
+            bezier
+            style={{
+              marginVertical: 8,
+              borderRadius: 16,
+            }}
+          />
         </View>
       ),
     },
@@ -144,10 +285,12 @@ export const FieldMonitoringScreen = () => {
         <View style={styles.inputContainer}>
           <HStack style={styles.heading}>
             <View style={styles.headingRow}>
-              <AppText style={styles.farmName}>Farm Name</AppText>
+              <AppText style={styles.farmName}>{farm?.label}</AppText>
             </View>
             <View style={styles.headingRow}>
-              <AppText>Farm Size</AppText>
+              <AppText>
+                {farm?.size} {farm?.sizeUnit}
+              </AppText>
               <AppText>Date Created</AppText>
             </View>
           </HStack>
@@ -158,6 +301,18 @@ export const FieldMonitoringScreen = () => {
           </View>
         </View>
       </BottomSheet>
+      <View style={styles.floatingButtonWrap}>
+        <ActionButton
+          onPress={() => navigateMasterScreen('recordHarvest', {farmId})}
+          styles={styles.floatingButton}
+          child={
+            <View style={styles.floatingButtonChild}>
+              <Icon iconType={AppIcons.add} width={30} />
+              <AppText style={styles.textLight}>Record Harvest</AppText>
+            </View>
+          }
+        />
+      </View>
     </View>
   );
 };

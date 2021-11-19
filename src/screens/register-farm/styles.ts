@@ -15,6 +15,14 @@ export const styles = StyleSheet.create({
     width: '100%',
     backgroundColor: 'transparent',
   },
+  zoomButton: {
+    position: 'absolute',
+    bottom: '50%',
+    right: 20,
+    width: 50,
+    height: 50,
+    backgroundColor: AppColors.White,
+  },
   overlayTop: {
     position: 'absolute',
     top: 10,

@@ -1,4 +1,4 @@
-import {ToastPosition, AnyObject} from 'react-native-toast-message';
+import {ToastPosition} from 'react-native-toast-message';
 
 export type ToastType = 'success' | 'error' | 'info';
 
@@ -11,7 +11,7 @@ export interface ToastConfig {
   autoHide?: boolean;
   topOffset?: number;
   bottomOffset?: number;
-  props?: AnyObject;
+  props?: unknown;
   onShow?: () => void;
   onHide?: () => void;
   onPress?: () => void;

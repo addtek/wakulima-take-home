@@ -1,5 +1,6 @@
 import * as Yup from 'yup';
 
 export const schema = Yup.object().shape({
-  farmLabel: Yup.string().required(),
+  crop: Yup.string(),
+  rain: Yup.string(),
 });

@@ -1,6 +1,6 @@
 import Axios, {AxiosError, AxiosInstance} from 'axios';
 
-import {showToast} from 'src/components/toast/toast';
+import {showToast} from 'src/components/Toast/toast';
 
 import config from 'src/config';
 
@@ -20,7 +20,7 @@ const errorHandler = (error: AxiosError) => {
 
 export const buildAxiosInstance = (): AxiosInstance => {
   const httpClient = Axios.create({
-    baseURL: `${config.api.protocol}://.${config.api.host}/api/v1`,
+    baseURL: `${config.api.protocol}://${config.api.host}`,
     headers: {apikey: `${config.api.apikey}`},
   });
   httpClient.interceptors.response.use(res => res, errorHandler);

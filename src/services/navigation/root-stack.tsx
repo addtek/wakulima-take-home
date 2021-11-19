@@ -7,7 +7,20 @@ import {HomeScreen} from 'src/screens/main';
 import {RecordFarmHarvestScreen} from 'src/screens/harvest-recording';
 import {RegisterFarmFieldScreen} from 'src/screens/register-farm';
 import {FieldMonitoringScreen} from 'src/screens/field-monitoring';
+import {FarmProvider} from 'src/providers/farm-provider/index.provider';
 const Stack = createStackNavigator<RootStackParamList>();
+
+const MainScreenWithContext = () => (
+  <FarmProvider>
+    <HomeScreen />
+  </FarmProvider>
+);
+
+const MonitoringScreenWithContext = () => (
+  <FarmProvider>
+    <FieldMonitoringScreen />
+  </FarmProvider>
+);
 
 const screenOptions = isIos
   ? {
@@ -31,7 +44,7 @@ export const RootStack = (): React.ReactElement => {
         screenOptions={{
           ...screenOptions,
         }}>
-        <Stack.Screen name="home" component={HomeScreen} />
+        <Stack.Screen name="home" component={MainScreenWithContext} />
         <Stack.Screen
           name="registerField"
           component={RegisterFarmFieldScreen}
@@ -42,7 +55,7 @@ export const RootStack = (): React.ReactElement => {
         />
         <Stack.Screen
           name="fieldMonitoring"
-          component={FieldMonitoringScreen}
+          component={MonitoringScreenWithContext}
         />
       </Stack.Navigator>
     </>

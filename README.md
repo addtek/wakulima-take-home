@@ -283,7 +283,7 @@ There are more useful tricks to explore. Feel free to explore [this](https://rea
     ├── src                     # Source files
     ├── .env                    # Environment variables
     ├── App.tsx                 # Main Application component
-    ├── index.ts                # React Native entry file
+    ├── index.provider.tsx      # React Native entry file
     ├── package.json            # Node modules file
     └── README.md
 

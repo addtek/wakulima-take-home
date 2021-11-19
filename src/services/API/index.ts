@@ -1,12 +1,12 @@
 import {AxiosInstance} from 'axios';
-import {buildAxiosInstance} from 'services/API/build-axios-instance';
-import {FormData} from 'src/hooks/userRegisterFarm';
-import {USER_ID} from 'config';
+import {buildAxiosInstance} from 'src/services/API/build-axios-instance';
+import {USER_ID} from 'src/config';
+import { FarmData } from "types/farm-field-data";
 
 export class API {
   static instance?: API = undefined;
   httpClient: AxiosInstance;
-
+  userId = parseInt(USER_ID);
   constructor() {
     this.httpClient = buildAxiosInstance();
   }
@@ -17,14 +17,23 @@ export class API {
     this.instance = new API();
     return this.instance;
   }
-  async registerFarm(params: FormData) {
+  async registerFarm(params: {
+    label: string;
+    id: number;
+    size: number;
+    sizeUnit: string;
+    ownerId: number;
+    uuid: string;
+  }) {
     return await this.httpClient
-      .post('farms', {...params, userId: USER_ID})
-      .then(res => res.data);
+      .post('farms', {...params, userId: this.userId, ownerType: 'string'})
+      .then(res => res);
   }
 
   async listFarms() {
-    return await this.httpClient.get('farms').then(res => res.data);
+    return await this.httpClient
+      .get('farms')
+      .then(res => res.data as FarmData[]);
   }
 
   async getFarm(id: number) {
@@ -41,9 +50,15 @@ export class API {
       .then(res => res.data);
   }
 
-  async createGeoShape(params: FormData) {
+  async createGeoShape(params: {
+    farmId: number;
+    id: number;
+    parcelId: string;
+    surfaceArea: number;
+    wkt: string;
+  }) {
     return await this.httpClient
-      .post('geoshapes', {...params, userId: USER_ID})
+      .post('geoshapes', {...params})
       .then(res => res.data);
   }
 
@@ -67,7 +82,7 @@ export class API {
 
   async recordHarvest(params: FormData) {
     return await this.httpClient
-      .post('harvests', {...params, userId: USER_ID})
+      .post('harvests', {...params, userId: this.userId})
       .then(res => res.data);
   }
 

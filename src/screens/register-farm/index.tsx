@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import React, {useCallback, useMemo, useRef, useState} from 'react';
 import {Image, SafeAreaView, View} from 'react-native';
 import MapboxGL from '@react-native-mapbox-gl/maps';
 import {ActionButton} from 'src/components/ActionButton';
@@ -8,17 +8,15 @@ import CustomBackButton from 'src/components/CustomBackButton';
 import {AppText} from 'src/components/AppText';
 import {styles} from './styles';
 
-import {useNavigation} from '@react-navigation/native';
 import {AppColors} from 'src/theme';
 import BottomSheet from '@gorhom/bottom-sheet';
 import {Controller} from 'react-hook-form';
 import {useRegisterFarm} from 'src/hooks/userRegisterFarm';
 import {Button, Divider, Input} from 'native-base';
-import {getCurrentPosition} from 'src/services/locations';
-import Coordinates = MapboxGL.Coordinates;
 import {useDiscardDialog} from 'src/components/DiscardDialog';
+import {formattedShortDate} from 'src/helpers/date';
 
-export type Position = number[];
+import ZoomButton from 'src/components/ZoomButton';
 
 export const RegisterFarmFieldScreen = () => {
   const bottomSheetRef = useRef<BottomSheet>(null);
@@ -31,26 +29,27 @@ export const RegisterFarmFieldScreen = () => {
     console.log('handleSheetChanges', index);
   }, []);
 
-  const [position, setPosition] = useState<null | {
-    latitude: number;
-    longitude: number;
-  }>();
-  const [polygonLocation, setLocations] = useState<Position[]>([]);
-  const [recording, setRecording] = useState(false);
-  const [warn, setWarn] = useState(false);
-  const [recordingAccepted, setRecordingAccepted] = useState(false);
-
-  const [] = useState({
-    latitude: 37.78825,
-    longitude: -122.4324,
-    latitudeDelta: 0.0922,
-    longitudeDelta: 0.0421,
-  });
-  const {control, isLoading} = useRegisterFarm();
-
-  useEffect(() => {
-    handleCenter();
-  }, [polygonLocation]);
+  const [zoom, setZoom] = useState(17);
+  const {
+    control,
+    isLoading,
+    submitForm,
+    errors,
+    setCoordinates,
+    coordinates,
+    position,
+    navigation,
+    warn,
+    setWarn,
+    setRecordingAccepted,
+    recording,
+    recordingAccepted,
+    setRecording,
+    size,
+    polygonData,
+    mapRef,
+    startRecording,
+  } = useRegisterFarm();
 
   const keepOn = () => {
     closeSheet();
@@ -59,7 +58,7 @@ export const RegisterFarmFieldScreen = () => {
 
   const toggleSaveForm = () => {
     setRecording(false);
-    setLocations([]);
+    setCoordinates([]);
     setRecordingAccepted(false);
     closeSheet();
     setTimeout(() => setWarn(false));
@@ -70,67 +69,44 @@ export const RegisterFarmFieldScreen = () => {
     setRecordingAccepted(true);
   };
   const {closeSheet, Dialog} = useDiscardDialog({
-    onCancel: toggleSaveForm,
-    onConfirm: keepOn,
+    onCancel: keepOn,
+    onConfirm: toggleSaveForm,
     message:
       'Note that your data will be lost! Are you sure you wand to stop this recording?',
   });
-  const handleCenter = () => {
-    getCurrentPosition(coords =>
-      setPosition({latitude: coords.latitude, longitude: coords.longitude}),
-    );
-    mapRef.current?.getCenter();
-  };
 
-  const polygonData = useCallback(() => {
-    let data: Position[] = [];
-    if (polygonLocation.length > 1) {
-      const lastIndex = polygonLocation.length - 1;
-      const startPoint = polygonLocation[0];
-      const endPoint = polygonLocation[lastIndex];
-      if (
-        startPoint[0] === endPoint[lastIndex] &&
-        endPoint[lastIndex] === startPoint[0]
-      ) {
-        data = polygonLocation;
-      } else {
-        data = [...polygonLocation, startPoint];
-      }
-    }
-    return data;
-  }, [polygonLocation]);
-  const mapRef = useRef<MapboxGL.MapView | null>();
-  const navigation = useNavigation();
-
-  const onLocation = (feature: {coords: Coordinates; timestamp?: number}) => {
+  const onLocation = (feature: {
+    geometry: {coordinates: number[]; type: 'Point'};
+    properties: {screenPointX: number; screenPointY: number};
+    type: 'Feature';
+  }) => {
     if (recording) {
-      setPosition({
-        latitude: feature.coords.latitude,
-        longitude: feature.coords.longitude,
-      });
       const newPoints = [
-        ...polygonLocation,
-        [feature.coords.longitude, feature.coords.latitude],
+        ...coordinates,
+        [feature.geometry.coordinates[0], feature.geometry.coordinates[1]],
       ];
-      setLocations(newPoints);
+      setCoordinates(newPoints);
     }
   };
-  const FarmAreaPolyGon = () => {
-    const coordinates = polygonData();
+
+  const FarmAreaPolygon = () => {
+    const polygonCoordinates = polygonData();
     const showPolygon =
-      recordingAccepted || (!recording && polygonLocation.length > 2);
+      recordingAccepted || (!recording && polygonCoordinates.length > 2);
     // @ts-ignore
     return (
       <MapboxGL.ShapeSource
         id="polygonSource"
-        maxZoomLevel={12}
+        maxZoomLevel={17}
         shape={{
           type: 'Feature',
           properties: {},
           geometry: {
             type: showPolygon ? 'Polygon' : 'LineString',
             // @ts-ignore
-            coordinates: showPolygon ? [coordinates] : coordinates,
+            coordinates: showPolygon
+              ? [polygonCoordinates]
+              : polygonCoordinates,
           },
         }}>
         {showPolygon ? (
@@ -173,6 +149,7 @@ export const RegisterFarmFieldScreen = () => {
       </MapboxGL.MarkerView>
     ) : null;
   };
+
   return (
     <View style={styles.container}>
       <MapboxGL.MapView
@@ -180,19 +157,19 @@ export const RegisterFarmFieldScreen = () => {
         style={styles.map}
         styleURL="mapbox://styles/mapbox/satellite-v9"
         logoEnabled={false}
-        compassEnabled={false}
-        onUserLocationUpdate={onLocation}>
+        onPress={onLocation}
+        compassEnabled={false}>
         {position ? (
           <MapboxGL.Camera
-            zoomLevel={17}
+            zoomLevel={zoom}
             followUserLocation={false}
             followUserMode="course"
             centerCoordinate={[position.longitude, position.latitude]}
           />
         ) : null}
-        {polygonLocation.length ? <FarmAreaPolyGon /> : null}
+        {coordinates.length ? <FarmAreaPolygon /> : null}
         <MapMarker />
-        <MapboxGL.UserLocation visible={false} onUpdate={onLocation} />
+        <MapboxGL.UserLocation visible={false} />
       </MapboxGL.MapView>
       <View style={styles.overlayTop}>
         <SafeAreaView>
@@ -225,11 +202,13 @@ export const RegisterFarmFieldScreen = () => {
             <View style={styles.sizeAndDateContainer}>
               <View style={styles.sizeDateRow}>
                 <AppText>Size</AppText>
-                <AppText>_</AppText>
+                <AppText>{size ? `${size} Acres` : ''}</AppText>
               </View>
               <View style={styles.sizeDateRow}>
                 <AppText>Date Registered</AppText>
-                <AppText>Date</AppText>
+                <AppText>
+                  {formattedShortDate(new Date().toISOString())}
+                </AppText>
               </View>
             </View>
             <View style={styles.inputContainer}>
@@ -243,10 +222,10 @@ export const RegisterFarmFieldScreen = () => {
                 render={(props): React.ReactElement => (
                   <Input
                     {...props}
+                    onChangeText={(value): void => props.field.onChange(value)}
                     clearButtonMode="while-editing"
                     testID="email"
                     variant="underlined"
-                    isRequired
                     placeholder="Enter Farm Label"
                     type={'text'}
                     autoCapitalize="none"
@@ -256,6 +235,9 @@ export const RegisterFarmFieldScreen = () => {
                   />
                 )}
               />
+              {errors?.farmLabel && (
+                <AppText>{errors?.farmLabel?.message}</AppText>
+              )}
               <View style={styles.flex}>
                 <Button
                   colorScheme="secondary"
@@ -268,7 +250,10 @@ export const RegisterFarmFieldScreen = () => {
                   Discard
                 </Button>
                 <Button
-                  isLoadingText="Save"
+                  onPress={submitForm}
+                  size="sm"
+                  isLoading={isLoading}
+                  isLoadingText={'Saving'}
                   style={[styles.button, styles.right]}>
                   Save
                 </Button>
@@ -286,7 +271,7 @@ export const RegisterFarmFieldScreen = () => {
             />
             <ActionButton
               styles={styles.recordAction}
-              onPress={() => setRecording(!recording)}
+              onPress={startRecording}
               child={
                 <Icon
                   iconType={recording ? AppIcons.pause : AppIcons.record}
@@ -302,6 +287,17 @@ export const RegisterFarmFieldScreen = () => {
           </View>
         </View>
       )}
+      <ZoomButton
+        style={styles.zoomButton}
+        color={'blue'}
+        onPress={async () => {
+          await mapRef.current?.getZoom().then(zoomVal => {
+            console.log(zoomVal);
+            setZoom(zoomVal + 1);
+            mapRef.current?.getCenter();
+          });
+        }}
+      />
       {warn && <Dialog />}
     </View>
   );

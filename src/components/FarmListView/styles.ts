@@ -50,9 +50,10 @@ export default StyleSheet.create({
   },
   tableLabelCell: {
     flex: 4,
+    paddingLeft: 10,
   },
   tableSizeCell: {
-    flex: 2,
+    flex: 1.5,
   },
   tableRow: {
     backgroundColor: AppColors.ThemeGreen900,
@@ -61,6 +62,7 @@ export default StyleSheet.create({
     paddingVertical: 16,
     marginBottom: 4,
     minHeight: 50,
+    flexDirection: 'row',
   },
   idText: {
     color: AppColors.ThemeGreen,

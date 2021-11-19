@@ -45,7 +45,7 @@ export const RecordFarmHarvestScreen = () => {
     latitudeDelta: 0.0922,
     longitudeDelta: 0.0421,
   });
-  const {control, isLoading} = useRecordFarmHarvest();
+  const {control, isLoading, submitForm} = useRecordFarmHarvest();
 
   useEffect(() => {
     handleCenter();
@@ -65,8 +65,8 @@ export const RecordFarmHarvestScreen = () => {
   };
 
   const {closeSheet, Dialog} = useDiscardDialog({
-    onCancel: toggleSaveForm,
-    onConfirm: keepOn,
+    onCancel: keepOn,
+    onConfirm: toggleSaveForm,
     message:
       'Note that your data will be lost! Are you sure you wand to stop this recording?',
   });
@@ -164,7 +164,6 @@ export const RecordFarmHarvestScreen = () => {
           />
         ) : null}
         {polygonLocation.length ? <FarmAreaPolyGon /> : null}
-        <MapboxGL.UserLocation visible={false} onUpdate={onLocation} />
       </MapboxGL.MapView>
       <View style={styles.overlayTop}>
         <SafeAreaView>
@@ -201,6 +200,7 @@ export const RecordFarmHarvestScreen = () => {
                 <View style={styles.input}>
                   <Select
                     {...props}
+                    onValueChange={(value): void => props.field.onChange(value)}
                     testID="email"
                     variant="underlined"
                     placeholder="Year"
@@ -222,6 +222,7 @@ export const RecordFarmHarvestScreen = () => {
                 <View style={styles.input}>
                   <Select
                     {...props}
+                    onValueChange={(value): void => props.field.onChange(value)}
                     testID="email"
                     variant="underlined"
                     placeholder="Season"
@@ -241,6 +242,7 @@ export const RecordFarmHarvestScreen = () => {
               render={(props): React.ReactElement => (
                 <Input
                   {...props}
+                  onChangeText={(value): void => props.field.onChange(value)}
                   clearButtonMode="while-editing"
                   testID="crop"
                   variant="underlined"
@@ -262,6 +264,7 @@ export const RecordFarmHarvestScreen = () => {
                 render={(props): React.ReactElement => (
                   <Input
                     {...props}
+                    onChangeText={(value): void => props.field.onChange(value)}
                     clearButtonMode="while-editing"
                     testID="quantity"
                     variant="underlined"
@@ -284,6 +287,9 @@ export const RecordFarmHarvestScreen = () => {
                   <View style={[styles.input, styles.flex1]}>
                     <Select
                       {...props}
+                      onValueChange={(value): void =>
+                        props.field.onChange(value)
+                      }
                       testID="unit"
                       variant="underlined"
                       placeholder="Unit"
@@ -308,7 +314,9 @@ export const RecordFarmHarvestScreen = () => {
                 Discard
               </Button>
               <Button
-                isLoadingText="Save"
+                isLoadingText="Saving"
+                isLoading={isLoading}
+                onPress={submitForm}
                 style={[styles.button, styles.right]}>
                 Save
               </Button>

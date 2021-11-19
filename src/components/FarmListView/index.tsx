@@ -14,6 +14,7 @@ import {Separator} from 'src/components/Separator';
 import {useFarmList} from 'src/hooks/useFarmList';
 import {AppColors} from 'src/theme';
 import {SvgProps} from 'react-native-svg';
+import {FarmFieldRow} from 'src/components/FarmListView/farm-field-row';
 
 interface MenuItemType {
   type: 'danger' | 'normal';
@@ -38,7 +39,19 @@ const MenuItem = ({type, icon, label}: MenuItemType) => {
 };
 
 export const FarmListView = () => {
-  const {visible, closeMenu, openMenu} = useFarmList();
+  const {
+    visible,
+    closeMenu,
+    openMenu,
+    farms,
+    selectFarm,
+    selectedFarms,
+    removeFarmFromSelection,
+    previewFarm,
+    deleting,
+    setWarn,
+    getFarms,
+  } = useFarmList();
   return (
     <View>
       <View style={styles.toolbar}>
@@ -57,7 +70,7 @@ export const FarmListView = () => {
               />
             </MenuTrigger>
             <MenuOptions optionsContainerStyle={styles.menuContainer}>
-              <MenuOption onSelect={() => null}>
+              <MenuOption onSelect={getFarms}>
                 <MenuItem
                   icon={AppIcons.refresh}
                   type="normal"
@@ -67,7 +80,9 @@ export const FarmListView = () => {
               <MenuOption onSelect={() => null}>
                 <MenuItem icon={AppIcons.send} type="normal" label="Send" />
               </MenuOption>
-              <MenuOption onSelect={() => null}>
+              <MenuOption
+                onSelect={setWarn}
+                disabled={!selectedFarms.length || deleting}>
                 <MenuItem
                   icon={AppIcons.trashTransparent}
                   type="danger"
@@ -91,6 +106,16 @@ export const FarmListView = () => {
             <AppText>Size</AppText>
           </View>
         </View>
+        {farms.map(farm => (
+          <FarmFieldRow
+            key={farm.uuid}
+            onPress={previewFarm}
+            onSelect={selectFarm}
+            onRemove={removeFarmFromSelection}
+            farmField={farm}
+            isSelected={selectedFarms.includes(farm.id)}
+          />
+        ))}
       </View>
     </View>
   );

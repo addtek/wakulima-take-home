@@ -179,4 +179,29 @@ export const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '700',
   },
+  tabContentView: {
+    minHeight: 200,
+  },
+  floatingButtonWrap: {
+    position: 'absolute',
+    bottom: 10,
+    right: 10,
+    shadowColor: 'rgba(0, 0, 0, 0.25)',
+    shadowOffset: {width: 3, height: 4},
+    shadowOpacity: 0.5,
+    justifyContent: 'center',
+  },
+  floatingButton: {
+    backgroundColor: AppColors.ThemeGreen,
+    width: 180,
+    flexDirection: 'row',
+  },
+  floatingButtonChild: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  textLight: {
+    color: AppColors.White,
+  },
 });

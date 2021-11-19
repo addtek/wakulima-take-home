@@ -58,11 +58,11 @@ export const useDiscardDialog = ({
               <Button
                 colorScheme="secondary"
                 size="sm"
-                onPress={onCancel}
+                onPress={onConfirm}
                 style={[styles.button, styles.left]}>
                 Yes, Got it!
               </Button>
-              <Button onPress={onConfirm} style={[styles.button, styles.right]}>
+              <Button onPress={onCancel} style={[styles.button, styles.right]}>
                 No, Keep on!
               </Button>
             </View>
