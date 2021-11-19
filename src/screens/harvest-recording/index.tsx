@@ -45,11 +45,15 @@ export const RecordFarmHarvestScreen = () => {
     latitudeDelta: 0.0922,
     longitudeDelta: 0.0421,
   });
-  const {control, isLoading, submitForm} = useRecordFarmHarvest();
+  const {control, isLoading, submitForm, errors} = useRecordFarmHarvest();
 
   useEffect(() => {
     handleCenter();
   }, [polygonLocation]);
+
+  useEffect(() => {
+    console.log(errors);
+  }, [errors]);
 
   const keepOn = () => {
     closeSheet();

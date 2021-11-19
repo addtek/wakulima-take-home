@@ -5,15 +5,13 @@ import MapboxGL from '@react-native-mapbox-gl/maps';
 import CustomBackButton from 'src/components/CustomBackButton';
 import {styles} from './styles';
 
-import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {AppColors} from 'src/theme';
 import BottomSheet from '@gorhom/bottom-sheet';
 import {Tabs} from 'src/components/Tabs';
 import {AppText} from 'src/components/AppText';
 import {Divider, HStack, Select} from 'native-base';
 import {Spacer} from 'src/components/Spacer';
-import {useFarmList} from 'src/hooks/useFarmList';
-import {RootStackParamList} from 'src/services/navigation/types';
+
 import {ActionButton} from 'src/components/ActionButton';
 import {navigateMasterScreen} from 'src/services/navigation/master-navigator';
 import {AppIcons, Icon} from 'src/components/Icon';
@@ -22,14 +20,10 @@ import {Controller} from 'react-hook-form';
 import {useFieldMonitoring} from 'src/hooks/useFieldMonitoring';
 
 export type Position = number[];
-export type MonitoringScreenRouteProp = RouteProp<
-  RootStackParamList,
-  'fieldMonitoring'
->;
+
 export const FieldMonitoringScreen = () => {
   const bottomSheetRef = useRef<BottomSheet>(null);
-  const route = useRoute<MonitoringScreenRouteProp>();
-  const {farmId} = route.params;
+  const {control, isLoading, farmId, farm, goBack} = useFieldMonitoring();
   const snapPoints = useMemo(() => ['60%', '75%'], []);
 
   // callbacks
@@ -39,15 +33,6 @@ export const FieldMonitoringScreen = () => {
 
   const [polygonLocation] = useState<Position[]>([]);
 
-  const {farms} = useFarmList();
-  const [farm, setFarm] = useState(
-    farms.find(currentFarm => currentFarm.id === farmId),
-  );
-
-  useEffect(() => {
-    setFarm(farms.find(currentFarm => currentFarm.id === farmId));
-  }, [farmId, farms]);
-
   useEffect(() => {
     handleCenter();
   }, [polygonLocation]);
@@ -55,7 +40,7 @@ export const FieldMonitoringScreen = () => {
   const handleCenter = () => {
     mapRef.current?.getCenter();
   };
-  const {control, isLoading} = useFieldMonitoring();
+
   const polygonData = useCallback(() => {
     let data: Position[] = [];
     if (polygonLocation.length > 1) {
@@ -74,7 +59,6 @@ export const FieldMonitoringScreen = () => {
     return data;
   }, [polygonLocation]);
   const mapRef = useRef<MapboxGL.MapView | null>();
-  const navigation = useNavigation();
 
   const FarmAreaPolyGon = () => {
     const coordinates = polygonData();
@@ -272,7 +256,7 @@ export const FieldMonitoringScreen = () => {
       <View style={styles.overlayTop}>
         <SafeAreaView>
           <View style={styles.actionBar}>
-            <CustomBackButton onPress={navigation.goBack} />
+            <CustomBackButton onPress={goBack} />
           </View>
         </SafeAreaView>
       </View>

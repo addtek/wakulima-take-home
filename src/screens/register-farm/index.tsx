@@ -16,8 +16,6 @@ import {Button, Divider, Input} from 'native-base';
 import {useDiscardDialog} from 'src/components/DiscardDialog';
 import {formattedShortDate} from 'src/helpers/date';
 
-import ZoomButton from 'src/components/ZoomButton';
-
 export const RegisterFarmFieldScreen = () => {
   const bottomSheetRef = useRef<BottomSheet>(null);
 
@@ -29,7 +27,7 @@ export const RegisterFarmFieldScreen = () => {
     console.log('handleSheetChanges', index);
   }, []);
 
-  const [zoom, setZoom] = useState(17);
+  const [zoom] = useState(17);
   const {
     control,
     isLoading,
@@ -287,17 +285,6 @@ export const RegisterFarmFieldScreen = () => {
           </View>
         </View>
       )}
-      <ZoomButton
-        style={styles.zoomButton}
-        color={'blue'}
-        onPress={async () => {
-          await mapRef.current?.getZoom().then(zoomVal => {
-            console.log(zoomVal);
-            setZoom(zoomVal + 1);
-            mapRef.current?.getCenter();
-          });
-        }}
-      />
       {warn && <Dialog />}
     </View>
   );

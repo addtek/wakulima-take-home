@@ -32,7 +32,17 @@ export type FarmData = {
   uuid: string;
   offline?: boolean;
 };
-
+export interface FarmHarvestData {
+  cropId: number;
+  cropLabel: string;
+  farmId: number;
+  id: number;
+  quantity: number;
+  quantityUnit: string;
+  seasonId: number;
+  seasonLabel: string;
+  userType: string;
+}
 export type FarmHarvestRecord = {
   year: string;
   season: string;

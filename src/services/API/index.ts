@@ -1,7 +1,7 @@
 import {AxiosInstance} from 'axios';
 import {buildAxiosInstance} from 'src/services/API/build-axios-instance';
 import {USER_ID} from 'src/config';
-import { FarmData } from "types/farm-field-data";
+import {FarmData, FarmHarvestData} from 'src/types/farm-field-data';
 
 export class API {
   static instance?: API = undefined;
@@ -58,8 +58,8 @@ export class API {
     wkt: string;
   }) {
     return await this.httpClient
-      .post('geoshapes', {...params})
-      .then(res => res.data);
+      .post('geoshapes', {...params, userId: this.userId, userType: 'string'})
+      .then(res => res);
   }
 
   async listGeoShapes() {
@@ -80,10 +80,10 @@ export class API {
       .then(res => res.data);
   }
 
-  async recordHarvest(params: FormData) {
+  async recordHarvest(params: FarmHarvestData) {
     return await this.httpClient
       .post('harvests', {...params, userId: this.userId})
-      .then(res => res.data);
+      .then(res => res);
   }
 
   async listHarvestRecords() {

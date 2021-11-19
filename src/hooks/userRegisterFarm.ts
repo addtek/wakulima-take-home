@@ -13,6 +13,7 @@ import {
 } from 'src/services/locations';
 import area from '@turf/area';
 import MapboxGL from '@react-native-mapbox-gl/maps';
+// import {FarmData} from 'types/farm-field-data';
 
 export interface FormData {
   farmLabel: string;
@@ -63,24 +64,46 @@ export const useRegisterFarm = () => {
     return data;
   }, [coordinates, recordingAccepted]);
 
+  const generateId = () => Math.round(100000 + Math.random() * 900000);
   const onSubmit: Submit = async data => {
     setLoading(true);
     await apiService
       .registerFarm({
-        id: Math.round(100000 + Math.random() * 900000),
+        id: generateId(),
         label: data.farmLabel,
-        size: Math.floor(size),
+        size: Math.round(size),
         uuid: `${Date.now() + parseInt(USER_ID)}`,
         ownerId: parseInt(USER_ID),
         sizeUnit: 'Acres',
       })
       .then(async response => {
-        console.log(response.data, response.status);
         if (response.status === 200) {
+          // const farmData = response.data as FarmData;
+          // const geoShapeResponse = await apiService.createGeoShape({
+          //   farmId: farmData.id,
+          //   id: generateId(),
+          //   parcelId: `${generateId()}`,
+          //   surfaceArea: Math.round(size),
+          //   wkt: JSON.stringify(polygonData()),
+          // });
+          // if (geoShapeResponse.status === 200) {
+          //   showToast({
+          //     type: 'success',
+          //     text1: 'Your farm was register',
+          //     text2: `Congratulation your farm, ${data.farmLabel} was registered successfully`,
+          //   });
+          // }
           showToast({
             type: 'success',
             text1: 'Your farm was register',
             text2: `Congratulation your farm, ${data.farmLabel} was registered successfully`,
+          });
+        } else {
+          showToast({
+            type: 'error',
+            text1: 'Fail to register farm',
+            text2:
+              'We are sorry but we were unable to register your farm at this time please try again later',
           });
         }
       })
